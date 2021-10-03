@@ -2,30 +2,9 @@
 #define _W25QXX_H
 
 /*
-  Author:     Nima Askari
-  WebSite:    http://www.github.com/NimaLTD
-  Instagram:  http://instagram.com/github.NimaLTD
-  Youtube:    https://www.youtube.com/channel/UCUhY7qY1klJm1d2kulr9ckw
-  
-  Version:    1.1.3
-  
-  
-  Reversion History:
-  
-  (1.1.3)
-  Fix Erase and write sector in w25q256 and w25q512.
-
-  (1.1.2)
-  Fix read ID.
-  
-  (1.1.1)
-  Fix some errors.
-  
-  (1.1.0)
-  Fix some errors.
-  
-  (1.0.0)
-  First release.
+  Author  : Luigi Calligaris, based on original work from Nima Askari (https://github.com/nimaltd/w25qxx, forked at v. 1.1.3)
+  GIT repo: https://github.com/luigicalligaris/w25qxx
+  License : GNU GENERAL PUBLIC LICENSE Version 3 (see LICENSE file)
 */
 
 #ifdef __cplusplus
@@ -35,6 +14,8 @@ extern "C"
 
 #include <stdbool.h>
 #include "main.h"
+
+#define W25QXX_DUMMY_BYTE 0xA5
 
 	typedef enum
 	{
@@ -100,6 +81,15 @@ extern "C"
 	void W25qxx_ReadSector(uint8_t *pBuffer, uint32_t Sector_Address, uint32_t OffsetInByte, uint32_t NumByteToRead_up_to_SectorSize);
 	void W25qxx_ReadBlock(uint8_t *pBuffer, uint32_t Block_Address, uint32_t OffsetInByte, uint32_t NumByteToRead_up_to_BlockSize);
 //############################################################################
+
+	uint8_t W25qxx_Spi(uint8_t Data);
+	void    W25qxx_ReadUniqID(void);
+	void    W25qxx_WriteEnable(void);
+	void    W25qxx_WriteDisable(void);
+	uint8_t W25qxx_ReadStatusRegister(uint8_t SelectStatusRegister_1_2_3);
+	void    W25qxx_WriteStatusRegister(uint8_t SelectStatusRegister_1_2_3, uint8_t Data);
+	void    W25qxx_WaitForWriteEnd(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,3 +1,8 @@
+/*
+  Author  : Luigi Calligaris, based on original work from Nima Askari (https://github.com/nimaltd/w25qxx, forked at v. 1.1.3)
+  GIT repo: https://github.com/luigicalligaris/w25qxx
+  License : GNU GENERAL PUBLIC LICENSE Version 3 (see LICENSE file)
+*/
 
 #include "w25qxxConf.h"
 #include "w25qxx.h"
@@ -5,8 +10,6 @@
 #if (_W25QXX_DEBUG == 1)
 #include <stdio.h>
 #endif
-
-#define W25QXX_DUMMY_BYTE 0xA5
 
 w25qxx_t w25qxx;
 extern SPI_HandleTypeDef _W25QXX_SPI;
@@ -26,14 +29,13 @@ uint8_t W25qxx_Spi(uint8_t Data)
 //###################################################################################################################
 uint32_t W25qxx_ReadID(void)
 {
-	uint32_t Temp = 0, Temp0 = 0, Temp1 = 0, Temp2 = 0;
 	HAL_GPIO_WritePin(_W25QXX_CS_GPIO, _W25QXX_CS_PIN, GPIO_PIN_RESET);
 	W25qxx_Spi(0x9F);
-	Temp0 = W25qxx_Spi(W25QXX_DUMMY_BYTE);
-	Temp1 = W25qxx_Spi(W25QXX_DUMMY_BYTE);
-	Temp2 = W25qxx_Spi(W25QXX_DUMMY_BYTE);
+	uint32_t const Temp0 = (uint32_t) W25qxx_Spi(W25QXX_DUMMY_BYTE);
+	uint32_t const Temp1 = (uint32_t) W25qxx_Spi(W25QXX_DUMMY_BYTE);
+	uint32_t const Temp2 = (uint32_t) W25qxx_Spi(W25QXX_DUMMY_BYTE);
 	HAL_GPIO_WritePin(_W25QXX_CS_GPIO, _W25QXX_CS_PIN, GPIO_PIN_SET);
-	Temp = (Temp0 << 16) | (Temp1 << 8) | Temp2;
+	uint32_t const Temp = (Temp0 << 16) | (Temp1 << 8) | Temp2;
 	return Temp;
 }
 //###################################################################################################################
@@ -253,6 +255,13 @@ void W25qxx_EraseChip(void)
 	uint32_t StartTime = HAL_GetTick();
 	printf("w25qxx EraseChip Begin...\r\n");
 #endif
+  // Write all zeroes to the status register, since any protection bit would disable the chip erase op
+	W25qxx_WriteEnable();
+	HAL_GPIO_WritePin(_W25QXX_CS_GPIO, _W25QXX_CS_PIN, GPIO_PIN_RESET);
+	W25qxx_Spi(0x01); // Command 01h: write status register
+	W25qxx_Spi(0x00); // Argument: 0b00000000
+	HAL_GPIO_WritePin(_W25QXX_CS_GPIO, _W25QXX_CS_PIN, GPIO_PIN_SET);
+
 	W25qxx_WriteEnable();
 	HAL_GPIO_WritePin(_W25QXX_CS_GPIO, _W25QXX_CS_PIN, GPIO_PIN_RESET);
 	W25qxx_Spi(0xC7);
